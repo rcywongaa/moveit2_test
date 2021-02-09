@@ -17,30 +17,46 @@ endif()
 
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(geometry_msgs REQUIRED)
+find_package(moveit_common REQUIRED)
+find_package(moveit_ros_planning_interface REQUIRED)
 
-add_library(robot src/Robot.cpp)
-ament_target_dependencies(robot rclcpp geometry_msgs)
+
+find_package(rosidl_default_generators REQUIRED)
+rosidl_generate_interfaces(${PROJECT_NAME}_msgs
+  "msg/PointTrajectory.msg"
+)
+
+include_directories(include)
+
+add_library(${PROJECT_NAME} src/Robot.cpp)
+ament_target_dependencies(${PROJECT_NAME}
+  rclcpp
+  moveit_ros_planning_interface
+)
+rosidl_target_interfaces(${PROJECT_NAME} ${PROJECT_NAME}_msgs "rosidl_typesupport_cpp")
 
 add_executable(node src/node.cpp)
-ament_target_dependencies(node robot rclcpp geometry_msgs)
+ament_target_dependencies(node rclcpp)
+target_link_libraries(node ${PROJECT_NAME})
+rosidl_target_interfaces(node ${PROJECT_NAME}_msgs "rosidl_typesupport_cpp")
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   # the following line skips the linter which checks for copyrights
   # uncomment the line when a copyright and license is not present in all source files
-  #set(ament_cmake_copyright_FOUND TRUE)
+  set(ament_cmake_copyright_FOUND TRUE)
   # the following line skips cpplint (only works in a git repo)
   # uncomment the line when this package is not in a git repo
   #set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
   find_package(ament_cmake_gmock REQUIRED)
   ament_add_gmock(robot_test src/test_Robot.cpp)
-  ament_target_dependencies(robot_test robot rclcpp geometry_msgs)
+  ament_target_dependencies(robot_test rclcpp)
+  target_link_libraries(robot_test ${PROJECT_NAME})
 endif()
 
 install(TARGETS
-  robot
+  ${PROJECT_NAME}
   DESTINATION lib/${PROJECT_NAME})
 
 ament_package()

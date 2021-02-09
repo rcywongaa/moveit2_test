@@ -1,0 +1,138 @@
+<?xml version="1.0"?>
+<robot name="example_robot">
+    <link name="link0">
+        <inertial>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <mass value="1.0"/>
+            <inertia ixx="1"  ixy="0"  ixz="0" iyy="1" iyz="0" izz="1" />
+        </inertial>
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <material name="blue">
+                <color rgba="0 0 .8 1"/>
+            </material>
+            <geometry>
+                <cylinder length="0.01" radius="0.5"/>
+            </geometry>
+        </visual>
+    </link>
+    <joint name="q1" type="revolute">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <parent link="link0"/>
+        <child link="link1"/>
+        <axis xyz="0 0 1"/>
+        <limit lower="-3.14" upper="3.14" effort="10" velocity="2"/>
+    </joint>
+    <link name="link1">
+        <inertial>
+            <origin xyz="0.5 0 0" rpy="0 0 0"/>
+            <mass value="1.0"/>
+            <inertia ixx="1"  ixy="0"  ixz="0" iyy="1" iyz="0" izz="1" />
+        </inertial>
+        <visual>
+            <origin xyz="0.5 0 0" rpy="0 1.57 0"/>
+            <material name="blue"/>
+            <geometry>
+                <cylinder length="1.0" radius="0.05"/>
+            </geometry>
+        </visual>
+    </link>
+    <joint name="q2" type="revolute">
+        <origin xyz="1.0 0 0" rpy="0 0 0"/>
+        <parent link="link1"/>
+        <child link="link2"/>
+        <axis xyz="0 -1 0"/>
+        <limit lower="-1.571" upper="1.571" effort="10" velocity="2"/>
+    </joint>
+    <link name="link2">
+        <inertial>
+            <origin xyz="0 0 0.25" rpy="0 0 0"/>
+            <mass value="1.0"/>
+            <inertia ixx="1"  ixy="0"  ixz="0" iyy="1" iyz="0" izz="1" />
+        </inertial>
+        <visual>
+            <origin xyz="0 0 0.25" rpy="0 0 0"/>
+            <material name="blue"/>
+            <geometry>
+                <cylinder length="0.5" radius="0.05"/>
+            </geometry>
+        </visual>
+    </link>
+    <joint name="q3" type="revolute">
+        <origin xyz="0 0 0.5" rpy="0 0 0"/>
+        <parent link="link2"/>
+        <child link="link3"/>
+        <axis xyz="0 1 0"/>
+        <limit lower="-3.14" upper="3.14" effort="10" velocity="2"/>
+    </joint>
+    <link name="link3">
+        <inertial>
+            <origin xyz="0 0 0.25" rpy="0 0 0"/>
+            <mass value="1.0"/>
+            <inertia ixx="1"  ixy="0"  ixz="0" iyy="1" iyz="0" izz="1" />
+        </inertial>
+        <visual>
+            <origin xyz="0 0 0.25" rpy="0 0 0"/>
+            <material name="blue"/>
+            <geometry>
+                <cylinder length="0.5" radius="0.05"/>
+            </geometry>
+        </visual>
+    </link>
+    <joint name="ee_joint" type="fixed">
+        <origin xyz="0 0 0.5" rpy="0 0 0"/>
+        <parent link="link3"/>
+        <child link="ee"/>
+    </joint>
+    <link name="ee">
+        <inertial>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <mass value="1.0"/>
+            <inertia ixx="1"  ixy="0"  ixz="0" iyy="1" iyz="0" izz="1" />
+        </inertial>
+        <visual>
+            <material name="blue"/>
+            <geometry>
+                <sphere radius="0.06"/>
+            </geometry>
+        </visual>
+    </link>
+    <!--<gazebo reference="link0">-->
+        <!--<material>Gazebo/Orange</material>-->
+    <!--</gazebo>-->
+    <!--<gazebo reference="link1">-->
+        <!--<material>Gazebo/Orange</material>-->
+    <!--</gazebo>-->
+    <!--<gazebo reference="link2">-->
+        <!--<material>Gazebo/Orange</material>-->
+    <!--</gazebo>-->
+    <!--<gazebo reference="link3">-->
+        <!--<material>Gazebo/Orange</material>-->
+    <!--</gazebo>-->
+    <!--<ros2_control name="RemyRobot" type="system">-->
+        <!--<hardware>-->
+            <!--<plugin>robot/PositionHardware</param>-->
+        <!--</hardware>-->
+        <!--<joint name="q1">-->
+            <!--<command_interface name="position">-->
+                <!--<param name="min">-3.14</param>-->
+                <!--<param name="max">3.14</param>-->
+            <!--</command_interface>-->
+            <!--<state_interface name="position"/>-->
+        <!--</joint>-->
+        <!--<joint name="q2">-->
+            <!--<command_interface name="position">-->
+                <!--<param name="min">-1.57</param>-->
+                <!--<param name="max">1.57</param>-->
+            <!--</command_interface>-->
+            <!--<state_interface name="position"/>-->
+        <!--</joint>-->
+        <!--<joint name="q3">-->
+            <!--<command_interface name="position">-->
+                <!--<param name="min">-3.14</param>-->
+                <!--<param name="max">3.14</param>-->
+            <!--</command_interface>-->
+            <!--<state_interface name="position"/>-->
+        <!--</joint>-->
+    <!--</ros2_control>-->
+</robot>
