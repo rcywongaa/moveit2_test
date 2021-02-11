@@ -1,0 +1,30 @@
+[submodule "dev_ws/moveit2/moveit2"]
+	path = dev_ws/moveit2/moveit2
+	url = https://github.com/ros-planning/moveit2
+[submodule "dev_ws/moveit2/fake_joint"]
+	path = dev_ws/moveit2/fake_joint
+	url = https://github.com/JafarAbdi/fake_joint
+[submodule "dev_ws/moveit2/moveit_msgs"]
+	path = dev_ws/moveit2/moveit_msgs
+	url = https://github.com/ros-planning/moveit_msgs
+[submodule "dev_ws/moveit2/warehouse_ros"]
+	path = dev_ws/moveit2/warehouse_ros
+	url = https://github.com/ros-planning/warehouse_ros
+[submodule "dev_ws/moveit2/ros2_control"]
+	path = dev_ws/moveit2/ros2_control
+	url = https://github.com/ros-controls/ros2_control
+[submodule "dev_ws/moveit2/warehouse_ros_mongo"]
+	path = dev_ws/moveit2/warehouse_ros_mongo
+	url = https://github.com/ros-planning/warehouse_ros_mongo
+[submodule "dev_ws/moveit2/moveit_resources"]
+	path = dev_ws/moveit2/moveit_resources
+	url = https://github.com/ros-planning/moveit_resources
+[submodule "dev_ws/moveit2/geometric_shapes"]
+	path = dev_ws/moveit2/geometric_shapes
+	url = https://github.com/ros-planning/geometric_shapes
+[submodule "dev_ws/moveit2/srdfdom"]
+	path = dev_ws/moveit2/srdfdom
+	url = https://github.com/ros-planning/srdfdom
+[submodule "dev_ws/moveit2/ros2_controllers"]
+	path = dev_ws/moveit2/ros2_controllers
+	url = https://github.com/ros-controls/ros2_controllers
