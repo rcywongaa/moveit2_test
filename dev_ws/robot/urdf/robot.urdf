@@ -46,12 +46,12 @@
     </joint>
     <link name="link2">
         <inertial>
-            <origin xyz="0 0 0.25" rpy="0 0 0"/>
+            <origin xyz="0.25 0 0" rpy="0 0 0"/>
             <mass value="1.0"/>
             <inertia ixx="1"  ixy="0"  ixz="0" iyy="1" iyz="0" izz="1" />
         </inertial>
         <visual>
-            <origin xyz="0 0 0.25" rpy="0 0 0"/>
+            <origin xyz="0.25 0 0" rpy="0 1.57 0"/>
             <material name="blue"/>
             <geometry>
                 <cylinder length="0.5" radius="0.05"/>
@@ -59,7 +59,7 @@
         </visual>
     </link>
     <joint name="q3" type="revolute">
-        <origin xyz="0 0 0.5" rpy="0 0 0"/>
+        <origin xyz="0.5 0 0" rpy="0 0 0"/>
         <parent link="link2"/>
         <child link="link3"/>
         <axis xyz="0 1 0"/>
@@ -67,22 +67,52 @@
     </joint>
     <link name="link3">
         <inertial>
-            <origin xyz="0 0 0.25" rpy="0 0 0"/>
+            <origin xyz="0.25 0 0" rpy="0 0 0"/>
             <mass value="1.0"/>
             <inertia ixx="1"  ixy="0"  ixz="0" iyy="1" iyz="0" izz="1" />
         </inertial>
         <visual>
-            <origin xyz="0 0 0.25" rpy="0 0 0"/>
+            <origin xyz="0.25 0 0" rpy="0 1.57 0"/>
             <material name="blue"/>
             <geometry>
                 <cylinder length="0.5" radius="0.05"/>
             </geometry>
         </visual>
     </link>
-    <joint name="ee_joint" type="fixed">
-        <origin xyz="0 0 0.5" rpy="0 0 0"/>
+    <link name="ee_yaw">
+        <inertial>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <mass value="0.0"/>
+            <inertia ixx="1"  ixy="0"  ixz="0" iyy="1" iyz="0" izz="1" />
+        </inertial>
+    </link>
+    <link name="ee_pitch">
+        <inertial>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <mass value="0.0"/>
+            <inertia ixx="1"  ixy="0"  ixz="0" iyy="1" iyz="0" izz="1" />
+        </inertial>
+    </link>
+    <joint name="ee_yaw_joint" type="revolute">
+        <origin xyz="0.5 0 0" rpy="0 0 0"/>
         <parent link="link3"/>
+        <child link="ee_yaw"/>
+        <axis xyz="0 0 1"/>
+        <limit lower="-3.14" upper="3.14" effort="10" velocity="2"/>
+    </joint>
+    <joint name="ee_pitch_joint" type="revolute">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <parent link="ee_yaw"/>
+        <child link="ee_pitch"/>
+        <axis xyz="0 1 0"/>
+        <limit lower="-3.14" upper="3.14" effort="10" velocity="2"/>
+    </joint>
+    <joint name="ee_roll_joint" type="revolute">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <parent link="ee_pitch"/>
         <child link="ee"/>
+        <axis xyz="1 0 0"/>
+        <limit lower="-3.14" upper="3.14" effort="10" velocity="2"/>
     </joint>
     <link name="ee">
         <inertial>

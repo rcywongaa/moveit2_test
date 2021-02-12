@@ -13,7 +13,9 @@
         <joint name="q1" />
         <joint name="q2" />
         <joint name="q3" />
-        <joint name="ee_joint" />
+        <joint name="ee_yaw_joint" />
+        <joint name="ee_pitch_joint" />
+        <joint name="ee_roll_joint" />
     </group>
     <group name="ee">
         <link name="ee" />
@@ -26,6 +28,11 @@
     <disable_collisions link1="link0" link2="link1" reason="Adjacent" />
     <disable_collisions link1="link1" link2="link2" reason="Adjacent" />
     <disable_collisions link1="link2" link2="link3" reason="Adjacent" />
+    <disable_collisions link1="link3" link2="ee_yaw" reason="Adjacent" />
+    <disable_collisions link1="link3" link2="ee_pitch" reason="Adjacent" />
     <disable_collisions link1="link3" link2="ee" reason="Adjacent" />
+    <disable_collisions link1="ee_yaw" link2="ee_pitch" reason="Adjacent" />
+    <disable_collisions link1="ee_yaw" link2="ee" reason="Adjacent" />
+    <disable_collisions link1="ee_pitch" link2="ee" reason="Adjacent" />
 </robot>
 
