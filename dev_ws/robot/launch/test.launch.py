@@ -36,7 +36,7 @@ def generate_launch_description():
     robot_description_config = load_file('robot', 'urdf/robot.urdf')
     robot_description = {"robot_description" : robot_description_config}
 
-    robot = Node(package="robot", executable="node", output="screen", parameters=[robot_description])
+    robot = Node(package="robot", executable="node", output="screen", parameters=[robot_description, {"trajectory_topic": "desired_trajectory"}])
 
     return LaunchDescription([
         DeclareLaunchArgument('rviz', default_value='true', description='Open RViz.'),

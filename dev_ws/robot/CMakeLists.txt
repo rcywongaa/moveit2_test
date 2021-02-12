@@ -20,13 +20,7 @@ find_package(rclcpp REQUIRED)
 find_package(moveit_common REQUIRED)
 find_package(moveit_ros_planning_interface REQUIRED)
 find_package(sensor_msgs REQUIRED)
-
-
-find_package(rosidl_default_generators REQUIRED)
-rosidl_generate_interfaces(${PROJECT_NAME}_msgs
-  "msg/PointTrajectory.msg"
-  LIBRARY_NAME ${PROJECT_NAME} # See https://github.com/ros2/rosidl/issues/441#issuecomment-591025515
-)
+find_package(robot_msgs REQUIRED)
 
 include_directories(include)
 
@@ -34,13 +28,12 @@ add_library(${PROJECT_NAME} src/Robot.cpp)
 ament_target_dependencies(${PROJECT_NAME}
   rclcpp
   moveit_ros_planning_interface
+  robot_msgs
 )
-rosidl_target_interfaces(${PROJECT_NAME} ${PROJECT_NAME}_msgs "rosidl_typesupport_cpp")
 
 add_executable(node src/node.cpp)
-ament_target_dependencies(node rclcpp)
+ament_target_dependencies(node rclcpp robot_msgs)
 target_link_libraries(node ${PROJECT_NAME})
-rosidl_target_interfaces(node ${PROJECT_NAME}_msgs "rosidl_typesupport_cpp")
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

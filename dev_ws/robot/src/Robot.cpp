@@ -6,14 +6,13 @@
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("Robot");
 
-Robot::Robot(const robot_model_loader::RobotModelLoader& model_loader)
+Robot::Robot(moveit::core::RobotModelPtr model)
+  : kinematic_model(model)
 {
-  // Set up MoveIt kinematic model
-  kinematic_model = model_loader.getModel();
   current_state = std::make_shared<moveit::core::RobotState>(kinematic_model);
 }
 
-bool Robot::run(robot::msg::PointTrajectory traj)
+bool Robot::run(robot_msgs::msg::PointTrajectory traj)
 {
   for (geometry_msgs::msg::PointStamped point_stamped : traj.trajectory)
   {
