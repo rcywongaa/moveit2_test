@@ -2,8 +2,7 @@
 
 #include <array>
 
-Robot::Robot(std::unique_ptr<Connection> connection, const robot_model_loader::RobotModelLoader& model_loader) :
-  connection_(std::move(connection))
+Robot::Robot(const robot_model_loader::RobotModelLoader& model_loader)
 {
   // Set up MoveIt kinematic model
   kinematic_model = model_loader.getModel();
@@ -21,11 +20,5 @@ bool Robot::run(robot::msg::PointTrajectory traj)
     // execute IK
     ;
   }
-}
-
-std::array<float, 3> Robot::parse(std::vector<unsigned char>& data)
-{
-  // Parse 12 unsigned chars into 3 joint values
-  // Each joint value is 4 unsigned char
-  return {0, 0, 0};
+  return is_found_ik;
 }
