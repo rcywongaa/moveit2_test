@@ -25,6 +25,7 @@ find_package(sensor_msgs REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 rosidl_generate_interfaces(${PROJECT_NAME}_msgs
   "msg/PointTrajectory.msg"
+  LIBRARY_NAME ${PROJECT_NAME} # See https://github.com/ros2/rosidl/issues/441#issuecomment-591025515
 )
 
 include_directories(include)
@@ -67,7 +68,7 @@ install(
 )
 
 install(
-  DIRECTORY launch
+  DIRECTORY launch urdf
   DESTINATION share/${PROJECT_NAME}
 )
 

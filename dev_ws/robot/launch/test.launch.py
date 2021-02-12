@@ -18,7 +18,8 @@ def load_file(package_name, file_path):
         with open(absolute_file_path, 'r') as file:
             return file.read()
     except EnvironmentError: # parent of IOError, OSError *and* WindowsError where available
-        return None
+        print(f"Error reading file: {absolute_file_path}")
+        exit(-1)
 
 def generate_launch_description():
 
@@ -27,15 +28,15 @@ def generate_launch_description():
     # RViz
     rviz = Node(
             package='rviz2',
-            node_executable='rviz2',
+            executable='rviz2',
             # arguments=['-d', os.path.join(pkg_robot, 'rviz', 'test.rviz')],
             condition=IfCondition(LaunchConfiguration('rviz'))
             )
 
     robot_description_config = load_file('robot', 'urdf/robot.urdf')
-    robot_description = {'robot_description' : robot_description_config}
+    robot_description = {"robot_description" : robot_description_config}
 
-    robot = Node(package="robot", node_executable="node")
+    robot = Node(package="robot", executable="node", output="screen", parameters=[robot_description])
 
     return LaunchDescription([
         DeclareLaunchArgument('rviz', default_value='true', description='Open RViz.'),
