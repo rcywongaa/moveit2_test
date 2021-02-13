@@ -34,6 +34,7 @@ class PointTrajectoryPublisher(Node):
                point_stamped.header.stamp = Time(seconds=float(entries[3])).to_msg()
                trajectory.trajectory.append(point_stamped)
         self.publisher.publish(trajectory)
+        self.get_logger().info("Trajectory published!")
 
     def declare_and_get_parameter(self, parameter_name, default_value=None):
         self.declare_parameter(parameter_name, default_value)
@@ -42,7 +43,7 @@ class PointTrajectoryPublisher(Node):
 def main(args=None):
     rclpy.init(args=args)
     publisher = PointTrajectoryPublisher()
-    rclpy.spin_once(publisher)
+    rclpy.spin(publisher)
     publisher.destroy_node()
     rclpy.shutdown()
 
