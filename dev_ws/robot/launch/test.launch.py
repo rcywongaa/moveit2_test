@@ -58,12 +58,16 @@ def generate_launch_description():
     robot = Node(
             package="robot",
             executable="node",
-            output="screen",
+            output={
+               'stdout': 'screen',
+               'stderr': 'screen'
+            },
             parameters=[
                 robot_description_param,
                 robot_semantic_param,
                 robot_kinematics_param,
-                {"trajectory_topic": "desired_trajectory"}
+                {"ee_trajectory_topic": "desired_trajectory"},
+                {"joint_trajectory_topic": "joint_trajectory"}
             ])
 
     pkg_trajectory_file_reader = get_package_share_directory('trajectory_file_reader')
