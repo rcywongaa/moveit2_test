@@ -17,14 +17,7 @@ Robot::Robot(moveit::core::RobotModelPtr model)
 std::optional<trajectory_msgs::msg::JointTrajectory>
 Robot::create_joint_trajectory(robot_msgs::msg::PointTrajectory traj)
 {
-  std::optional<trajectory_msgs::msg::JointTrajectory> joint_trajectory =
-    calcIK(traj);
-  if (joint_trajectory)
-  {
-    //return interpolate(*joint_trajectory);
-    return *joint_trajectory;
-  }
-  else return {};
+  return calcIK(traj);
 }
 
 std::optional<trajectory_msgs::msg::JointTrajectory>
@@ -83,11 +76,6 @@ Robot::calcIK(robot_msgs::msg::PointTrajectory traj)
   }
   return joint_trajectory;
 }
-
-//trajectory_msgs::msg::JointTrajectory interpolate(trajectory_msgs::msg::JointTrajectory trajectory)
-//{
-  //;
-//}
 
 void Robot::update(const sensor_msgs::msg::JointState::SharedPtr input)
 {

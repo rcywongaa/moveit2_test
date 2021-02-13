@@ -23,11 +23,6 @@ class Robot
     std::optional<trajectory_msgs::msg::JointTrajectory>
     calcIK(robot_msgs::msg::PointTrajectory traj);
 
-    /**
-     * @brief Interpolates the given trajectory by filling in joint points along trajectory
-     */
-    //trajectory_msgs::msg::JointTrajectory interpolate(trajectory_msgs::msg::JointTrajectory trajectory);
-
     std::mutex mtx;
     moveit::core::RobotModelPtr kinematic_model;
     moveit::core::RobotStatePtr current_state;
