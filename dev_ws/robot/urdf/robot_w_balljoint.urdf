@@ -98,10 +98,30 @@
             </geometry>
         </collision>
     </link>
-    <joint name="ee_joint" type="fixed">
+    <link name="ee_yaw">
+    </link>
+    <link name="ee_pitch">
+    </link>
+    <joint name="ee_yaw_joint" type="revolute">
         <origin xyz="5 0 0" rpy="0 0 0"/>
         <parent link="link3"/>
+        <child link="ee_yaw"/>
+        <axis xyz="0 0 1"/>
+        <limit lower="-3.14" upper="3.14" effort="10" velocity="2"/>
+    </joint>
+    <joint name="ee_pitch_joint" type="revolute">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <parent link="ee_yaw"/>
+        <child link="ee_pitch"/>
+        <axis xyz="0 1 0"/>
+        <limit lower="-3.14" upper="3.14" effort="10" velocity="2"/>
+    </joint>
+    <joint name="ee_roll_joint" type="revolute">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <parent link="ee_pitch"/>
         <child link="ee"/>
+        <axis xyz="1 0 0"/>
+        <limit lower="-3.14" upper="3.14" effort="10" velocity="2"/>
     </joint>
     <link name="ee">
         <inertial>
@@ -120,42 +140,4 @@
             </geometry>
         </collision>
     </link>
-    <!--<gazebo reference="link0">-->
-        <!--<material>Gazebo/Orange</material>-->
-    <!--</gazebo>-->
-    <!--<gazebo reference="link1">-->
-        <!--<material>Gazebo/Orange</material>-->
-    <!--</gazebo>-->
-    <!--<gazebo reference="link2">-->
-        <!--<material>Gazebo/Orange</material>-->
-    <!--</gazebo>-->
-    <!--<gazebo reference="link3">-->
-        <!--<material>Gazebo/Orange</material>-->
-    <!--</gazebo>-->
-    <!--<ros2_control name="RemyRobot" type="system">-->
-        <!--<hardware>-->
-            <!--<plugin>robot/PositionHardware</param>-->
-        <!--</hardware>-->
-        <!--<joint name="q1">-->
-            <!--<command_interface name="position">-->
-                <!--<param name="min">-3.14</param>-->
-                <!--<param name="max">3.14</param>-->
-            <!--</command_interface>-->
-            <!--<state_interface name="position"/>-->
-        <!--</joint>-->
-        <!--<joint name="q2">-->
-            <!--<command_interface name="position">-->
-                <!--<param name="min">-1.57</param>-->
-                <!--<param name="max">1.57</param>-->
-            <!--</command_interface>-->
-            <!--<state_interface name="position"/>-->
-        <!--</joint>-->
-        <!--<joint name="q3">-->
-            <!--<command_interface name="position">-->
-                <!--<param name="min">-3.14</param>-->
-                <!--<param name="max">3.14</param>-->
-            <!--</command_interface>-->
-            <!--<state_interface name="position"/>-->
-        <!--</joint>-->
-    <!--</ros2_control>-->
 </robot>

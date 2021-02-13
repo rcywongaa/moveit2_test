@@ -1,4 +1,5 @@
 import os
+import yaml
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
@@ -21,6 +22,19 @@ def load_file(package_name, file_path):
         print(f"Error reading file: {absolute_file_path}")
         exit(-1)
 
+# Copied from https://github.com/ros-planning/moveit2/blob/main/moveit_ros/benchmarks/examples/demo_panda.launch.py
+def load_yaml(package_name, file_path):
+    package_path = get_package_share_directory(package_name)
+    absolute_file_path = os.path.join(package_path, file_path)
+
+    try:
+        with open(absolute_file_path, 'r') as file:
+            return yaml.safe_load(file)
+    except EnvironmentError: # parent of IOError, OSError *and* WindowsError where available
+        print(f"Error reading file: {absolute_file_path}")
+        exit(-1)
+
+
 def generate_launch_description():
 
     pkg_robot = get_package_share_directory('robot')
@@ -33,14 +47,32 @@ def generate_launch_description():
             condition=IfCondition(LaunchConfiguration('rviz'))
             )
 
-    robot_description_config = load_file('robot', 'urdf/robot.urdf')
-    robot_description = {"robot_description" : robot_description_config}
+    # We fake a balljoint at the end effector to fake position only IK
+    robot_description = load_file('robot', 'urdf/robot_w_balljoint.urdf')
+    robot_description_param = {"robot_description" : robot_description}
+    robot_semantic = load_file('robot', 'urdf/robot_w_balljoint.srdf')
+    robot_semantic_param = {"robot_description_semantic" : robot_semantic}
+    kinematics_yaml = load_yaml('robot', 'urdf/kinematics.yaml')
+    robot_kinematics_param = {'robot_description_kinematics' : kinematics_yaml}
 
-    robot = Node(package="robot", executable="node", output="screen", parameters=[robot_description, {"trajectory_topic": "desired_trajectory"}])
+    robot = Node(
+            package="robot",
+            executable="node",
+            output="screen",
+            parameters=[
+                robot_description_param,
+                robot_semantic_param,
+                robot_kinematics_param,
+                {"trajectory_topic": "desired_trajectory"}
+            ])
+
+    pkg_trajectory_file_reader = get_package_share_directory('trajectory_file_reader')
+    file_reader = IncludeLaunchDescription(
+            PythonLaunchDescriptionSource([pkg_trajectory_file_reader, '/main.launch.py']))
 
     return LaunchDescription([
         DeclareLaunchArgument('rviz', default_value='true', description='Open RViz.'),
         robot,
-        rviz
+        file_reader
     ])
 

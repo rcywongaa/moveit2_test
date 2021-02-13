@@ -23,17 +23,25 @@ bool Robot::run(robot_msgs::msg::PointTrajectory traj)
           point_stamped.point.x,
           point_stamped.point.y,
           point_stamped.point.z));
-    double timeout = 0.1;
-    bool is_found_ik = current_state->setFromIK(joint_model_group, end_effector_state, timeout);
+    RCLCPP_INFO(LOGGER, "Calculating IK for (%f, %f, %f)",
+        end_effector_state.translation()[0],
+        end_effector_state.translation()[1],
+        end_effector_state.translation()[2]);
+    moveit::core::RobotStatePtr desired_state = std::make_shared<moveit::core::RobotState>(kinematic_model);
+    bool is_found_ik = desired_state->setFromIK(joint_model_group, end_effector_state);
     if (is_found_ik)
     {
+      RCLCPP_INFO(LOGGER, "Found IK solution: %f, %f, %f",
+        *(desired_state->getJointPositions("q1")),
+        *(desired_state->getJointPositions("q2")),
+        *(desired_state->getJointPositions("q3")));
       // execute IK
       ;
     }
     else
     {
       RCLCPP_INFO(LOGGER, "Failed to find IK solution!");
-      return false;
+      //return false;
     }
   }
   return true;
