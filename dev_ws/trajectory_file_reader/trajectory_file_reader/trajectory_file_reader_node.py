@@ -1,7 +1,7 @@
 import rclpy
 from rclpy.node import Node
-from geometry_msgs.msg import PointStamped
-from rclpy.time import Time
+from geometry_msgs.msg import Point
+from rclpy.time import Duration
 from rclpy.qos import QoSProfile, DurabilityPolicy, HistoryPolicy
 
 
@@ -27,12 +27,12 @@ class PointTrajectoryPublisher(Node):
         with open(filename) as f:
            for cnt, line in enumerate(f):
                entries = line.split(' ')
-               point_stamped = PointStamped()
-               point_stamped.point.x = float(entries[0])
-               point_stamped.point.y = float(entries[1])
-               point_stamped.point.z = float(entries[2])
-               point_stamped.header.stamp = Time(seconds=float(entries[3])).to_msg()
-               trajectory.trajectory.append(point_stamped)
+               point = Point()
+               point.x = float(entries[0])
+               point.y = float(entries[1])
+               point.z = float(entries[2])
+               trajectory.points.append(point)
+               trajectory.time_from_start.append(Duration(seconds=float(entries[3])).to_msg())
         self.publisher.publish(trajectory)
         self.get_logger().info("Trajectory published!")
 

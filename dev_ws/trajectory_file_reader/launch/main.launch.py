@@ -16,7 +16,10 @@ def generate_launch_description():
     publisher = Node(
             package="trajectory_file_reader",
             executable="trajectory_file_reader",
-            output="screen",
+            output={
+               'stdout': 'screen',
+               'stderr': 'screen'
+            },
             parameters=[
                 {"trajectory_topic" : "desired_trajectory"},
                 {"filename" : os.path.join(pkg_trajectory_file_reader, "input.in")}
