@@ -19,16 +19,19 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(trajectory_msgs REQUIRED)
 
 include_directories(include)
 
 add_library(${PROJECT_NAME} src/RobotHwInterface.cpp)
 ament_target_dependencies(${PROJECT_NAME}
   rclcpp
+  sensor_msgs
+  trajectory_msgs
 )
 
 add_executable(node src/node.cpp)
-ament_target_dependencies(node rclcpp)
+ament_target_dependencies(node rclcpp sensor_msgs trajectory_msgs)
 target_link_libraries(node ${PROJECT_NAME})
 
 if(BUILD_TESTING)

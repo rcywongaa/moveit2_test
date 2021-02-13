@@ -3,6 +3,8 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("RobotHwInterface");
+
 RobotHwInterface::JointData RobotHwInterface::parse(std::vector<unsigned char>& data)
 {
   std::array<double, NUM_JOINTS> ret;
@@ -43,7 +45,7 @@ std::vector<unsigned char> RobotHwInterface::encode(RobotHwInterface::JointData 
     for (unsigned int byte_idx = 0; byte_idx < BYTES_PER_JOINT; byte_idx++, data_idx++)
     {
       unsigned int byte_shift = IS_BIG_ENDIAN ? BYTES_PER_JOINT - byte_idx : byte_idx;
-      ret[byte_idx] |= (position_int << byte_shift);
+      ret[data_idx] = (position_int << byte_shift);
     }
   }
   return ret;
@@ -67,10 +69,10 @@ RobotHwInterface::~RobotHwInterface()
   connection_->close();
 }
 
-void RobotHwInterface::set_setpoint(sensor_msgs::msg::JointState setpoint)
+void RobotHwInterface::set_trajectory(trajectory_msgs::msg::JointTrajectory trajectory)
 {
-  std::scoped_lock<std::mutex> lock(setpoint_mtx);
-  setpoint_ = setpoint;
+  std::scoped_lock<std::mutex> lock(trajectory_mtx);
+  trajectory_ = trajectory;
 }
 
 sensor_msgs::msg::JointState RobotHwInterface::get_joint_state()
@@ -81,15 +83,61 @@ sensor_msgs::msg::JointState RobotHwInterface::get_joint_state()
 
 void RobotHwInterface::spin_once()
 {
-  send_setpoint();
   receive_joint_data();
+
+  std::scoped_lock<std::mutex> lock(trajectory_mtx);
+  if (!trajectory_)
+  {
+    return;
+  }
+  if (!trajectory_start_time_)
+  {
+    trajectory_start_time_ = rclcpp::Clock().now();
+  }
+  
+  rclcpp::Duration time_from_start = rclcpp::Clock().now() - *trajectory_start_time_;
+  // Find the current active segment
+  // identified by trajectory_->position[end_segment_idx-1] to trajectory_->position[end_segment_idx]
+  // Start at 1 because trajectory point at 0 will always have time 0
+  unsigned int end_segment_idx = 1;
+  for (end_segment_idx = 1;
+      end_segment_idx < trajectory_->points.size()
+      && rclcpp::Duration(trajectory_->points[end_segment_idx].time_from_start) < time_from_start;
+      end_segment_idx++);
+
+  if (end_segment_idx >= trajectory_->points.size())
+  {
+    RCLCPP_INFO(LOGGER, "Trajectory completed!");
+    trajectory_start_time_.reset();
+    trajectory_.reset();
+  }
+  else
+  {
+    RCLCPP_INFO(LOGGER, "Time: %f, segment: %d", time_from_start.seconds(), end_segment_idx);
+    trajectory_msgs::msg::JointTrajectoryPoint interpolated_point;
+    std::vector<double> start_point = trajectory_->points[end_segment_idx-1].positions;
+    std::vector<double> end_point = trajectory_->points[end_segment_idx].positions;
+    rclcpp::Duration start_time = trajectory_->points[end_segment_idx-1].time_from_start;
+    rclcpp::Duration end_time = trajectory_->points[end_segment_idx].time_from_start;
+    rclcpp::Duration segment_duration = end_time - start_time;
+    trajectory_msgs::msg::JointTrajectoryPoint setpoint;
+    setpoint.positions.resize(NUM_JOINTS);
+
+    // Interpolate position
+    double start_point_weight = (time_from_start - start_time).seconds() / segment_duration.seconds();
+    for (unsigned int joint_idx = 0; joint_idx < NUM_JOINTS; joint_idx++)
+    {
+      setpoint.positions[joint_idx] =
+        start_point_weight*start_point[joint_idx] + (1.0-start_point_weight)*end_point[joint_idx];
+    }
+    send_setpoint(setpoint);
+  }
 }
 
-void RobotHwInterface::send_setpoint()
+void RobotHwInterface::send_setpoint(trajectory_msgs::msg::JointTrajectoryPoint setpoint)
 {
-  std::scoped_lock<std::mutex> lock(setpoint_mtx);
   JointData joint_data;
-  std::copy(setpoint_.position.begin(), setpoint_.position.end(), joint_data.begin());
+  std::copy(setpoint.positions.begin(), setpoint.positions.end(), joint_data.begin());
   std::vector<unsigned char> data = encode(joint_data);
   //FIXME: Error checking
   connection_->send(data);

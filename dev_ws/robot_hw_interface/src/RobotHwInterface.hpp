@@ -4,9 +4,12 @@
 #include <array>
 #include <mutex>
 
-#include "Connection.hpp"
-
+#include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
+#include <trajectory_msgs/msg/joint_trajectory_point.hpp>
+#include <trajectory_msgs/msg/joint_trajectory.hpp>
+
+#include "Connection.hpp"
 
 // TODO: This should eventually be modified to comply with ros2_control
 class RobotHwInterface
@@ -32,20 +35,21 @@ class RobotHwInterface
     RobotHwInterface& operator=(const RobotHwInterface &) = delete; // Copy assignment
     RobotHwInterface& operator=(RobotHwInterface &&) noexcept = delete; // Move assignment
 
-    void set_setpoint(sensor_msgs::msg::JointState setpoint);
+    void set_trajectory(trajectory_msgs::msg::JointTrajectory trajectory);
 
     sensor_msgs::msg::JointState get_joint_state();
 
     void spin_once();
 
   private:
-    void send_setpoint();
+    void send_setpoint(trajectory_msgs::msg::JointTrajectoryPoint setpoint);
     void receive_joint_data();
 
-    std::mutex setpoint_mtx;
+    std::mutex trajectory_mtx;
     std::mutex joint_angles_mtx;
     std::unique_ptr<Connection> connection_;
     sensor_msgs::msg::JointState joint_angles_;
-    sensor_msgs::msg::JointState setpoint_;
 
+    std::optional<trajectory_msgs::msg::JointTrajectory> trajectory_;
+    std::optional<rclcpp::Time> trajectory_start_time_;
 };
