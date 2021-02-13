@@ -58,6 +58,7 @@ def generate_launch_description():
     robot = Node(
             package="robot",
             executable="node",
+            name="RobotNode",
             output={
                'stdout': 'screen',
                'stderr': 'screen'
@@ -74,9 +75,24 @@ def generate_launch_description():
     file_reader = IncludeLaunchDescription(
             PythonLaunchDescriptionSource([pkg_trajectory_file_reader, '/main.launch.py']))
 
+    controller = Node(
+            package="robot_hw_interface",
+            executable="node",
+            name="RobotHwInterfaceNode",
+            # prefix=['tmux new-window gdb -ex run --args'],
+            output={
+               'stdout': 'screen',
+               'stderr': 'screen'
+            },
+            parameters=[
+                {"state_topic": "joint_state"},
+                {"joint_trajectory_topic": "joint_trajectory"}
+            ])
+
     return LaunchDescription([
         DeclareLaunchArgument('rviz', default_value='true', description='Open RViz.'),
         robot,
+        controller,
         file_reader
     ])
 
