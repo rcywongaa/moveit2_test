@@ -1,5 +1,7 @@
 # Remy Test
 
+![](https://github.com/rcywongaa/remy_test/workflows/CI/badge.svg)
+
 ## Assumptions
 - Encoder values are sent as four-byte IEEE-754 floating point values with little endian
 - Commands are represented in the same form as encoder values
