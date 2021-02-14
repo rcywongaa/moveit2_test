@@ -76,9 +76,9 @@ def generate_launch_description():
             PythonLaunchDescriptionSource([pkg_trajectory_file_reader, '/main.launch.py']))
 
     controller = Node(
-            package="robot_hw_interface",
+            package="robot_controller",
             executable="node",
-            name="RobotHwInterfaceNode",
+            name="RobotControllerNode",
             # prefix=['tmux new-window gdb -ex run --args'],
             output={
                'stdout': 'screen',

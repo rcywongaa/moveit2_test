@@ -1,9 +1,9 @@
-#include "RobotHwInterface.hpp"
+#include "RobotController.hpp"
 
 #define _USE_MATH_DEFINES
 #include <cmath>
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("RobotHwInterface");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("RobotController");
 
 // Taken from https://stackoverflow.com/questions/3991478/building-a-32-bit-float-out-of-its-4-composite-bytes
 float bytesToFloat(unsigned char b0, unsigned char b1, unsigned char b2, unsigned char b3)
@@ -18,9 +18,9 @@ float bytesToFloat(unsigned char b0, unsigned char b1, unsigned char b2, unsigne
     return output;
 }
 
-RobotHwInterface::JointData RobotHwInterface::parse(std::vector<unsigned char>& data)
+RobotController::JointData RobotController::parse(std::vector<unsigned char>& data)
 {
-  RobotHwInterface::JointData ret;
+  RobotController::JointData ret;
   for (unsigned int joint_idx = 0; joint_idx < 3; joint_idx++)
   {
     float joint_position = bytesToFloat(
@@ -38,7 +38,7 @@ RobotHwInterface::JointData RobotHwInterface::parse(std::vector<unsigned char>& 
   return ret;
 }
 
-std::vector<unsigned char> RobotHwInterface::encode(RobotHwInterface::JointData input)
+std::vector<unsigned char> RobotController::encode(RobotController::JointData input)
 {
   std::vector<unsigned char> ret;
   ret.resize(DATA_SIZE);
@@ -62,7 +62,7 @@ std::vector<unsigned char> RobotHwInterface::encode(RobotHwInterface::JointData 
   return ret;
 }
 
-RobotHwInterface::RobotHwInterface(std::unique_ptr<Connection> connection)
+RobotController::RobotController(std::unique_ptr<Connection> connection)
   : connection_(std::move(connection))
 {
   // TODO: Get joint names from parameter
@@ -73,25 +73,25 @@ RobotHwInterface::RobotHwInterface(std::unique_ptr<Connection> connection)
   connection_->open();
 }
 
-RobotHwInterface::~RobotHwInterface()
+RobotController::~RobotController()
 {
   //FIXME: Error checking
   connection_->close();
 }
 
-void RobotHwInterface::set_trajectory(trajectory_msgs::msg::JointTrajectory trajectory)
+void RobotController::set_trajectory(trajectory_msgs::msg::JointTrajectory trajectory)
 {
   std::scoped_lock<std::mutex> lock(trajectory_mtx);
   trajectory_ = trajectory;
 }
 
-sensor_msgs::msg::JointState RobotHwInterface::get_joint_state()
+sensor_msgs::msg::JointState RobotController::get_joint_state()
 {
   std::scoped_lock<std::mutex> lock(joint_angles_mtx);
   return joint_angles_;
 }
 
-void RobotHwInterface::spin_once()
+void RobotController::spin_once()
 {
   receive_joint_data();
 
@@ -145,7 +145,7 @@ void RobotHwInterface::spin_once()
   }
 }
 
-void RobotHwInterface::send_setpoint(trajectory_msgs::msg::JointTrajectoryPoint setpoint)
+void RobotController::send_setpoint(trajectory_msgs::msg::JointTrajectoryPoint setpoint)
 {
   JointData joint_data;
   std::copy(setpoint.positions.begin(), setpoint.positions.end(), joint_data.begin());
@@ -154,7 +154,7 @@ void RobotHwInterface::send_setpoint(trajectory_msgs::msg::JointTrajectoryPoint 
   connection_->send(data);
 }
 
-void RobotHwInterface::receive_joint_data()
+void RobotController::receive_joint_data()
 {
   std::vector<unsigned char> data;
   //FIXME: Error checking

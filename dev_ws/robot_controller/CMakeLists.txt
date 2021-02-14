@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(robot_hw_interface)
+project(robot_controller)
 
 # Default to C99
 if(NOT CMAKE_C_STANDARD)
@@ -23,7 +23,7 @@ find_package(trajectory_msgs REQUIRED)
 
 include_directories(include)
 
-add_library(${PROJECT_NAME} src/RobotHwInterface.cpp)
+add_library(${PROJECT_NAME} src/RobotController.cpp)
 ament_target_dependencies(${PROJECT_NAME}
   rclcpp
   sensor_msgs
@@ -45,9 +45,9 @@ if(BUILD_TESTING)
   #ament_lint_auto_find_test_dependencies()
 
   find_package(ament_cmake_gmock REQUIRED)
-  ament_add_gmock(robot_hw_interface_test src/test_RobotHwInterface.cpp)
-  ament_target_dependencies(robot_hw_interface_test rclcpp)
-  target_link_libraries(robot_hw_interface_test ${PROJECT_NAME})
+  ament_add_gmock(robot_controller_test src/test_RobotController.cpp)
+  ament_target_dependencies(robot_controller_test rclcpp)
+  target_link_libraries(robot_controller_test ${PROJECT_NAME})
 endif()
 
 install(TARGETS

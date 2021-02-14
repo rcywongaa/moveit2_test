@@ -5,14 +5,14 @@
 #include "gmock/gmock.h"
 
 #include "Connection.hpp"
-#include "RobotHwInterface.hpp"
+#include "RobotController.hpp"
 
 using namespace ::testing;
 using ::testing::StrictMock;
 using ::testing::NiceMock;
 using ::testing::InSequence;
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("test_RobotHwInterface");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("test_RobotController");
 
 class MockConnection : public Connection
 {
@@ -23,20 +23,20 @@ class MockConnection : public Connection
         MOCK_METHOD1(receive, int(std::vector<unsigned char>&));
 };
 
-class RobotHwInterfaceTest : public testing::Test
+class RobotControllerTest : public testing::Test
 {
   protected:
-    RobotHwInterfaceTest()
+    RobotControllerTest()
     {
       std::unique_ptr<StrictMock<MockConnection>> connection = std::make_unique<StrictMock<MockConnection>>();
       connection_ = connection.get();
       EXPECT_CALL(*connection_, open()).WillOnce(Return(0));
       EXPECT_CALL(*connection_, close()).WillOnce(Return(0));
-      interface_ = std::make_unique<RobotHwInterface>(std::move(connection));
+      interface_ = std::make_unique<RobotController>(std::move(connection));
     }
 
     StrictMock<MockConnection>* connection_;
-    std::unique_ptr<RobotHwInterface> interface_;
+    std::unique_ptr<RobotController> interface_;
 };
 
 trajectory_msgs::msg::JointTrajectoryPoint create_joint_point(
@@ -82,7 +82,7 @@ void dummy_receive(std::vector<unsigned char>& output)
 
 // FIXME: This test is flaky since any slight timing delay will change the float
 // which will lead to completely different bytes...
-TEST_F(RobotHwInterfaceTest, DISABLED_set_trajectory_and_spin)
+TEST_F(RobotControllerTest, DISABLED_set_trajectory_and_spin)
 {
   interface_->set_trajectory(create_default_trajectory());
 
@@ -124,7 +124,7 @@ TEST_F(RobotHwInterfaceTest, DISABLED_set_trajectory_and_spin)
   interface_->spin_once();
 }
 
-TEST_F(RobotHwInterfaceTest, set_trajectory_and_spin_hold)
+TEST_F(RobotControllerTest, set_trajectory_and_spin_hold)
 {
   interface_->set_trajectory(create_hold_trajectory());
 
@@ -157,7 +157,7 @@ MATCHER_P(FloatNearPointwise, tol, "is near") {
     return (std::get<0>(arg) > std::get<1>(arg)-tol && std::get<0>(arg) < std::get<1>(arg)+tol);
 }
 
-TEST_F(RobotHwInterfaceTest, get_joint_state)
+TEST_F(RobotControllerTest, get_joint_state)
 {
   EXPECT_CALL(*connection_, receive(_)).WillOnce(DoAll(
         Invoke(dummy_receive),

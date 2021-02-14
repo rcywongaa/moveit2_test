@@ -12,7 +12,7 @@
 #include "Connection.hpp"
 
 // TODO: This should eventually be modified to comply with ros2_control
-class RobotHwInterface
+class RobotController
 {
   private:
     static const unsigned int NUM_JOINTS = 3;
@@ -22,13 +22,13 @@ class RobotHwInterface
   public:
     using JointData = std::array<float, NUM_JOINTS>;
 
-    RobotHwInterface(std::unique_ptr<Connection> connection);
-    ~RobotHwInterface();
+    RobotController(std::unique_ptr<Connection> connection);
+    ~RobotController();
     // We assume non-copyable for now
-    RobotHwInterface(const RobotHwInterface &) = delete; // Copy constructor
-    RobotHwInterface(RobotHwInterface &&) noexcept = delete; // Move constructor
-    RobotHwInterface& operator=(const RobotHwInterface &) = delete; // Copy assignment
-    RobotHwInterface& operator=(RobotHwInterface &&) noexcept = delete; // Move assignment
+    RobotController(const RobotController &) = delete; // Copy constructor
+    RobotController(RobotController &&) noexcept = delete; // Move constructor
+    RobotController& operator=(const RobotController &) = delete; // Copy assignment
+    RobotController& operator=(RobotController &&) noexcept = delete; // Move assignment
 
     void set_trajectory(trajectory_msgs::msg::JointTrajectory trajectory);
 

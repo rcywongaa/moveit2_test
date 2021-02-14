@@ -5,7 +5,7 @@
 #include <trajectory_msgs/msg/joint_trajectory_point.hpp>
 #include <trajectory_msgs/msg/joint_trajectory.hpp>
 
-#include "RobotHwInterface.hpp"
+#include "RobotController.hpp"
 #include "Connection.hpp"
 
 using namespace std::chrono_literals;
@@ -58,14 +58,14 @@ class PrintingConnection : public Connection
     rclcpp::Logger logger;
 };
 
-class RobotHwInterfaceNode : public rclcpp::Node
+class RobotControllerNode : public rclcpp::Node
 {
   public:
-    RobotHwInterfaceNode() : rclcpp::Node("RobotHwInterfaceNode")
+    RobotControllerNode() : rclcpp::Node("RobotControllerNode")
     {
-      RCLCPP_INFO(this->get_logger(), "RobotHwInterfaceNode created!");
+      RCLCPP_INFO(this->get_logger(), "RobotControllerNode created!");
 
-      interface_ = std::make_unique<RobotHwInterface>(std::make_unique<PrintingConnection>());
+      interface_ = std::make_unique<RobotController>(std::make_unique<PrintingConnection>());
 
       state_publisher_ = this->create_publisher<sensor_msgs::msg::JointState>(
           declare_and_get_parameter("state_topic").as_string(),
@@ -80,7 +80,7 @@ class RobotHwInterfaceNode : public rclcpp::Node
           });
 
       timer_ = this->create_wall_timer(
-          20ms, std::bind(&RobotHwInterfaceNode::timer_callback, this));
+          20ms, std::bind(&RobotControllerNode::timer_callback, this));
     }
 
     void timer_callback()
@@ -97,7 +97,7 @@ class RobotHwInterfaceNode : public rclcpp::Node
     }
 
     rclcpp::TimerBase::SharedPtr timer_;
-    std::unique_ptr<RobotHwInterface> interface_;
+    std::unique_ptr<RobotController> interface_;
     rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr state_publisher_;
     rclcpp::Subscription<trajectory_msgs::msg::JointTrajectory>::SharedPtr joint_trajectory_subscriber_;
 };
@@ -105,6 +105,6 @@ class RobotHwInterfaceNode : public rclcpp::Node
 int main(int argc, char** argv)
 {
   rclcpp::init(argc, argv);
-  rclcpp::spin(std::make_shared<RobotHwInterfaceNode>());
+  rclcpp::spin(std::make_shared<RobotControllerNode>());
   rclcpp::shutdown();
 }
