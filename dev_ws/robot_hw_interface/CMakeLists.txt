@@ -35,14 +35,19 @@ ament_target_dependencies(node rclcpp sensor_msgs trajectory_msgs)
 target_link_libraries(node ${PROJECT_NAME})
 
 if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
+  #find_package(ament_lint_auto REQUIRED)
   # the following line skips the linter which checks for copyrights
   # uncomment the line when a copyright and license is not present in all source files
   #set(ament_cmake_copyright_FOUND TRUE)
   # the following line skips cpplint (only works in a git repo)
   # uncomment the line when this package is not in a git repo
   #set(ament_cmake_cpplint_FOUND TRUE)
-  ament_lint_auto_find_test_dependencies()
+  #ament_lint_auto_find_test_dependencies()
+
+  find_package(ament_cmake_gmock REQUIRED)
+  ament_add_gmock(robot_hw_interface_test src/test_RobotHwInterface.cpp)
+  ament_target_dependencies(robot_hw_interface_test rclcpp)
+  target_link_libraries(robot_hw_interface_test ${PROJECT_NAME})
 endif()
 
 install(TARGETS

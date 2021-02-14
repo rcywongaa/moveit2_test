@@ -21,9 +21,6 @@ class RobotHwInterface
 
   public:
     using JointData = std::array<float, NUM_JOINTS>;
-    // JointState position data are represented in the form of [-pi, pi]
-    static JointData parse(std::vector<unsigned char>& data);
-    static std::vector<unsigned char> encode(JointData input);
 
     RobotHwInterface(std::unique_ptr<Connection> connection);
     ~RobotHwInterface();
@@ -40,6 +37,10 @@ class RobotHwInterface
     void spin_once();
 
   private:
+    // JointState position data are represented in the form of [-pi, pi]
+    static JointData parse(std::vector<unsigned char>& data);
+    static std::vector<unsigned char> encode(JointData input);
+
     void send_setpoint(trajectory_msgs::msg::JointTrajectoryPoint setpoint);
     void receive_joint_data();
 
