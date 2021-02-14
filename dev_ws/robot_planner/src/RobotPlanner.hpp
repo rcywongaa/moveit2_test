@@ -9,15 +9,13 @@
 #include <sensor_msgs/msg/joint_state.hpp>
 #include "robot_msgs/msg/point_trajectory.hpp"
 
-class Robot
+class RobotPlanner
 {
   public:
-    Robot(moveit::core::RobotModelPtr model);
+    RobotPlanner(moveit::core::RobotModelPtr model);
 
     std::optional<trajectory_msgs::msg::JointTrajectory>
     create_joint_trajectory(robot_msgs::msg::PointTrajectory traj);
-
-    void update(const sensor_msgs::msg::JointState::SharedPtr input);
 
   private:
     std::optional<trajectory_msgs::msg::JointTrajectory>
@@ -25,5 +23,4 @@ class Robot
 
     std::mutex mtx;
     moveit::core::RobotModelPtr kinematic_model;
-    moveit::core::RobotStatePtr current_state;
 };

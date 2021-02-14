@@ -37,7 +37,7 @@ def load_yaml(package_name, file_path):
 
 def generate_launch_description():
 
-    pkg_robot = get_package_share_directory('robot')
+    pkg_robot = get_package_share_directory('robot_planner')
 
     # RViz
     rviz = Node(
@@ -48,17 +48,17 @@ def generate_launch_description():
             )
 
     # We fake a balljoint at the end effector to fake position only IK
-    robot_description = load_file('robot', 'urdf/robot_w_balljoint.urdf')
+    robot_description = load_file('robot_planner', 'urdf/robot_w_balljoint.urdf')
     robot_description_param = {"robot_description" : robot_description}
-    robot_semantic = load_file('robot', 'urdf/robot_w_balljoint.srdf')
+    robot_semantic = load_file('robot_planner', 'urdf/robot_w_balljoint.srdf')
     robot_semantic_param = {"robot_description_semantic" : robot_semantic}
-    kinematics_yaml = load_yaml('robot', 'urdf/kinematics.yaml')
+    kinematics_yaml = load_yaml('robot_planner', 'urdf/kinematics.yaml')
     robot_kinematics_param = {'robot_description_kinematics' : kinematics_yaml}
 
-    robot = Node(
-            package="robot",
+    planner = Node(
+            package="robot_planner",
             executable="node",
-            name="RobotNode",
+            name="RobotPlannerNode",
             output={
                'stdout': 'screen',
                'stderr': 'screen'
@@ -79,7 +79,7 @@ def generate_launch_description():
             package="robot_controller",
             executable="node",
             name="RobotControllerNode",
-            # prefix=['tmux new-window gdb -ex run --args'],
+            # prefix=["tmux new-window /opt/ros/foxy/env.sh gdb -ex run --args"],
             output={
                'stdout': 'screen',
                'stderr': 'screen'
@@ -90,8 +90,7 @@ def generate_launch_description():
             ])
 
     return LaunchDescription([
-        DeclareLaunchArgument('rviz', default_value='true', description='Open RViz.'),
-        robot,
+        planner,
         controller,
         file_reader
     ])

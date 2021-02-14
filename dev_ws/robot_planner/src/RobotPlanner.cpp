@@ -4,24 +4,22 @@
 #include <rclcpp/rclcpp.hpp>
 #include <trajectory_msgs/msg/joint_trajectory.hpp>
 
-#include "Robot.hpp"
+#include "RobotPlanner.hpp"
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("Robot");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("RobotPlanner");
 
-Robot::Robot(moveit::core::RobotModelPtr model)
+RobotPlanner::RobotPlanner(moveit::core::RobotModelPtr model)
   : kinematic_model(model)
-{
-  current_state = std::make_shared<moveit::core::RobotState>(kinematic_model);
-}
+{}
 
 std::optional<trajectory_msgs::msg::JointTrajectory>
-Robot::create_joint_trajectory(robot_msgs::msg::PointTrajectory traj)
+RobotPlanner::create_joint_trajectory(robot_msgs::msg::PointTrajectory traj)
 {
   return calcIK(traj);
 }
 
 std::optional<trajectory_msgs::msg::JointTrajectory>
-Robot::calcIK(robot_msgs::msg::PointTrajectory traj)
+RobotPlanner::calcIK(robot_msgs::msg::PointTrajectory traj)
 {
   trajectory_msgs::msg::JointTrajectory joint_trajectory;
   // FIXME: Take joint names as parameter
@@ -75,13 +73,4 @@ Robot::calcIK(robot_msgs::msg::PointTrajectory traj)
     joint_trajectory.points.push_back(joint_point);
   }
   return joint_trajectory;
-}
-
-void Robot::update(const sensor_msgs::msg::JointState::SharedPtr input)
-{
-  std::scoped_lock<std::mutex> lock(mtx);
-  for (unsigned int i = 0; i < input->name.size(); i++)
-  {
-    current_state->setJointPositions(input->name[i], &(input->position[i]));
-  }
 }

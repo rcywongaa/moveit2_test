@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(robot)
+project(robot_planner)
 
 # Default to C99
 if(NOT CMAKE_C_STANDARD)
@@ -25,7 +25,7 @@ find_package(trajectory_msgs REQUIRED)
 
 include_directories(include)
 
-add_library(${PROJECT_NAME} src/Robot.cpp)
+add_library(${PROJECT_NAME} src/RobotPlanner.cpp)
 ament_target_dependencies(${PROJECT_NAME}
   rclcpp
   moveit_ros_planning_interface
@@ -46,9 +46,9 @@ if(BUILD_TESTING)
   #set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
   find_package(ament_cmake_gmock REQUIRED)
-  ament_add_gmock(robot_test src/test_Robot.cpp)
-  ament_target_dependencies(robot_test rclcpp)
-  target_link_libraries(robot_test ${PROJECT_NAME})
+  ament_add_gmock(robot_planner_test src/test_RobotPlanner.cpp)
+  ament_target_dependencies(robot_planner_test rclcpp)
+  target_link_libraries(robot_planner_test ${PROJECT_NAME})
 endif()
 
 install(
