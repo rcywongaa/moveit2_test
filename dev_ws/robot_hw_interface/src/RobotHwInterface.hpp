@@ -16,13 +16,11 @@ class RobotHwInterface
 {
   private:
     static const unsigned int NUM_JOINTS = 3;
-    static const bool IS_BIG_ENDIAN = true;
     static const unsigned int DATA_SIZE = 12;
-    static const unsigned int BYTES_PER_JOINT = 4;
     static const unsigned int VALUE_PER_REVOLUTION = 4096; // 12 bits per revolution
 
   public:
-    using JointData = std::array<double, NUM_JOINTS>;
+    using JointData = std::array<float, NUM_JOINTS>;
     // JointState position data are represented in the form of [-pi, pi]
     static JointData parse(std::vector<unsigned char>& data);
     static std::vector<unsigned char> encode(JointData input);

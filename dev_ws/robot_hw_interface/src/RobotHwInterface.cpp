@@ -5,20 +5,30 @@
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("RobotHwInterface");
 
+// Taken from https://stackoverflow.com/questions/3991478/building-a-32-bit-float-out-of-its-4-composite-bytes
+float bytesToFloat(unsigned char b0, unsigned char b1, unsigned char b2, unsigned char b3)
+{
+    float output;
+
+    *((unsigned char*)(&output) + 3) = b0;
+    *((unsigned char*)(&output) + 2) = b1;
+    *((unsigned char*)(&output) + 1) = b2;
+    *((unsigned char*)(&output) + 0) = b3;
+
+    return output;
+}
+
 RobotHwInterface::JointData RobotHwInterface::parse(std::vector<unsigned char>& data)
 {
-  std::array<double, NUM_JOINTS> ret;
-  unsigned int data_idx = 0;
+  RobotHwInterface::JointData ret;
   for (unsigned int joint_idx = 0; joint_idx < 3; joint_idx++)
   {
-    unsigned int joint_angle_int = 0;
-    for (unsigned int byte_idx = 0; byte_idx < BYTES_PER_JOINT; byte_idx++, data_idx++)
-    {
-      unsigned int byte_shift = IS_BIG_ENDIAN ? BYTES_PER_JOINT - byte_idx : byte_idx;
-      joint_angle_int |= (data[data_idx] << byte_shift);
-    }
-    double joint_position = double(joint_angle_int) / double(VALUE_PER_REVOLUTION) * 2*M_PI;
-    // convert from range [0, 2*pi] to [-pi, pi]
+    float joint_position = bytesToFloat(
+        data[4*joint_idx],
+        data[4*joint_idx + 1],
+        data[4*joint_idx + 2],
+        data[4*joint_idx + 3]);
+
     if (joint_position > M_PI)
     {
       joint_position -= 2*M_PI;
@@ -32,20 +42,21 @@ std::vector<unsigned char> RobotHwInterface::encode(RobotHwInterface::JointData 
 {
   std::vector<unsigned char> ret;
   ret.resize(DATA_SIZE);
-  unsigned int data_idx = 0;
   for (unsigned int joint_idx = 0; joint_idx < input.size(); joint_idx++)
   {
-    double joint_position = input[joint_idx];
+    float joint_position = input[joint_idx];
+    RCLCPP_INFO(LOGGER, "Encoding joint value: %f", joint_position);
     // convert from range [-pi, pi] to [0, 2*pi]
     if (joint_position < 0)
     {
       joint_position += 2*M_PI;
     }
-    unsigned int position_int = joint_position / (2*M_PI) * double(VALUE_PER_REVOLUTION);
-    for (unsigned int byte_idx = 0; byte_idx < BYTES_PER_JOINT; byte_idx++, data_idx++)
+    // Taken from https://stackoverflow.com/questions/14018894/how-to-convert-float-to-byte-array-of-length-4-array-of-char
+    unsigned char const * p = reinterpret_cast<unsigned char const *>(&joint_position);
+    for (std::size_t i = 0; i < sizeof(float); i++)
     {
-      unsigned int byte_shift = IS_BIG_ENDIAN ? BYTES_PER_JOINT - byte_idx : byte_idx;
-      ret[data_idx] = (position_int << byte_shift);
+      ret[4*joint_idx + i] = p[i];
+      RCLCPP_INFO(LOGGER, "Encoded byte[%d]: 0x%x", i, p[i]);
     }
   }
   return ret;
@@ -55,7 +66,6 @@ RobotHwInterface::RobotHwInterface(std::unique_ptr<Connection> connection)
   : connection_(std::move(connection))
 {
   // TODO: Get joint names from parameter
-  // robot_model.getActiveJointModels() or robot_model.getJointModelNames()
   joint_angles_.name = {"q1", "q2", "q3"};
   joint_angles_.position = {0, 0, 0};
 
@@ -94,7 +104,7 @@ void RobotHwInterface::spin_once()
   {
     trajectory_start_time_ = rclcpp::Clock().now();
   }
-  
+
   rclcpp::Duration time_from_start = rclcpp::Clock().now() - *trajectory_start_time_;
   // Find the current active segment
   // identified by trajectory_->position[end_segment_idx-1] to trajectory_->position[end_segment_idx]
@@ -124,11 +134,12 @@ void RobotHwInterface::spin_once()
     setpoint.positions.resize(NUM_JOINTS);
 
     // Interpolate position
-    double start_point_weight = (time_from_start - start_time).seconds() / segment_duration.seconds();
+    double end_point_weight = (time_from_start - start_time).seconds() / segment_duration.seconds();
     for (unsigned int joint_idx = 0; joint_idx < NUM_JOINTS; joint_idx++)
     {
       setpoint.positions[joint_idx] =
-        start_point_weight*start_point[joint_idx] + (1.0-start_point_weight)*end_point[joint_idx];
+        (1.0-end_point_weight)*start_point[joint_idx] + end_point_weight*end_point[joint_idx];
+      RCLCPP_INFO(LOGGER, "Setpoint[%d]: %f", joint_idx, setpoint.positions[joint_idx]);
     }
     send_setpoint(setpoint);
   }

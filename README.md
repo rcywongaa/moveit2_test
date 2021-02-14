@@ -1,5 +1,8 @@
 # Remy Test
 
+## Assumptions
+- Encoder values are sent as four-byte IEEE-754 floating point values with little endian
+- Commands are represented in the same form as encoder values
 ## Prerequisites
 1. [Install ROS2 Dashing](https://index.ros.org/doc/ros2/Installation/Dashing/Linux-Install-Debians/)
 1. Install dependencies
