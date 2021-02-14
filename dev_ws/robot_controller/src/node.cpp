@@ -31,11 +31,10 @@ class PrintingConnection : public Connection
 
     virtual int send(std::vector<unsigned char>& data) override
     {
-      RCLCPP_INFO(logger, "----- send -----\n%x %x %x %x\n%x %x %x %x\n%x %x %x %x",
+      RCLCPP_INFO(logger, "\n----- send -----\n%x %x %x %x\n%x %x %x %x\n%x %x %x %x",
           data[0], data[1], data[2], data[3],
           data[4], data[5], data[6], data[7],
           data[8], data[9], data[10], data[11]);
-      RCLCPP_INFO(logger, "----------");
       return 0;
     }
 

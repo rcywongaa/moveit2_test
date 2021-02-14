@@ -45,7 +45,6 @@ std::vector<unsigned char> RobotController::encode(RobotController::JointData in
   for (unsigned int joint_idx = 0; joint_idx < input.size(); joint_idx++)
   {
     float joint_position = input[joint_idx];
-    RCLCPP_INFO(LOGGER, "Encoding joint value: %f", joint_position);
     // convert from range [-pi, pi] to [0, 2*pi]
     if (joint_position < 0)
     {
@@ -56,7 +55,6 @@ std::vector<unsigned char> RobotController::encode(RobotController::JointData in
     for (std::size_t i = 0; i < sizeof(float); i++)
     {
       ret[4*joint_idx + i] = p[i];
-      RCLCPP_INFO(LOGGER, "Encoded byte[%d]: 0x%x", i, p[i]);
     }
   }
   return ret;
