@@ -1,6 +1,7 @@
 # Remy Test
 
-![](https://github.com/rcywongaa/remy_test/workflows/CI/badge.svg)
+![](https://github.com/rcywongaa/remy_test/workflows/full_build/badge.svg)
+![](https://github.com/rcywongaa/remy_test/workflows/incremental_build/badge.svg)
 
 ## Assumptions
 - Encoder values are sent as four-byte IEEE-754 floating point values with little endian

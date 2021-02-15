@@ -1,0 +1,26 @@
+name: full_build
+
+on: workflow_dispatch  # This workflow takes 30+ mins, only trigger manually
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    container: rcywongaa/remy_test:base
+
+    steps:
+    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+    - uses: actions/checkout@v2
+      with:
+        submodules: 'true'
+
+    - name: build
+      working-directory: dev_ws
+      run: source /opt/ros/foxy/setup.bash && colcon build
+
+    - name: test
+      working-directory: dev_ws
+      run: source /opt/ros/foxy/setup.bash && colcon test --packages-up-to robot_controller # Only test robot_controller for now

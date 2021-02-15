@@ -1,7 +1,5 @@
-name: CI
+name: incremental_build
 
-# Controls when the action will run. Triggers the workflow on push or pull request
-# events but only for the master branch
 on:
   push:
     branches: [ main ]
@@ -15,13 +13,17 @@ defaults:
 jobs:
   build:
     runs-on: ubuntu-20.04
-    container: rcywongaa/remy_test:base
+    container: rcywongaa/remy_test:moveit
 
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
       with:
         submodules: 'true'
+
+    - name: ignore_moveit
+      working-directory: dev_ws
+      run: touch moveit2/COLCON_IGNORE
 
     - name: build
       working-directory: dev_ws
