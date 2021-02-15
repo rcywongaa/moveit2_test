@@ -29,4 +29,4 @@ jobs:
 
     - name: test
       working-directory: dev_ws
-      run: source /opt/ros/melodic/setup.bash && colcon test robot_controller # Only test robot_controller for now
+      run: source /opt/ros/foxy/setup.bash && colcon test --packages-up-to robot_controller # Only test robot_controller for now
