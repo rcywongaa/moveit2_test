@@ -11,6 +11,10 @@
   > For position-controlled joints, desired positions are simply forwarded to the joints
 
 ## Build
+### Clone
+```
+git clone --recurse-submodules https://github.com/rcywongaa/remy_test.git
+```
 ### Source
 In `dev_ws`:
 ```
@@ -18,10 +22,18 @@ colcon build
 ```
 
 ## Run
+Launch planner and controller
 ```
 source dev_ws/install/setup.bash
 ros2 launch robot_planner test.launch.py
 ```
+Launch trajectory file reader
+```
+ros2 launch trajectory_file_reader main.launch.py
+```
+
+## Demo
+![](./resources/demo.gif)
 
 ## Docker Images
 In project root directory:
