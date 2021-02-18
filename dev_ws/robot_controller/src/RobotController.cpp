@@ -10,10 +10,10 @@ float bytesToFloat(unsigned char b0, unsigned char b1, unsigned char b2, unsigne
 {
     float output;
 
-    *((unsigned char*)(&output) + 3) = b0;
-    *((unsigned char*)(&output) + 2) = b1;
-    *((unsigned char*)(&output) + 1) = b2;
-    *((unsigned char*)(&output) + 0) = b3;
+    *((unsigned char*)(&output) + 0) = b0;
+    *((unsigned char*)(&output) + 1) = b1;
+    *((unsigned char*)(&output) + 2) = b2;
+    *((unsigned char*)(&output) + 3) = b3;
 
     return output;
 }
@@ -64,6 +64,7 @@ RobotController::RobotController(std::unique_ptr<Connection> connection)
   : connection_(std::move(connection))
 {
   // TODO: Get joint names from parameter
+  joint_angles_.header.frame_id = "world";
   joint_angles_.name = {"q1", "q2", "q3"};
   joint_angles_.position = {0, 0, 0};
 
@@ -159,5 +160,6 @@ void RobotController::receive_joint_data()
   connection_->receive(data);
   JointData joint_data = parse(data);
   std::scoped_lock<std::mutex> lock(joint_angles_mtx);
+  joint_angles_.header.stamp = rclcpp::Clock().now();
   std::copy(joint_data.begin(), joint_data.end(), joint_angles_.position.begin());
 }
