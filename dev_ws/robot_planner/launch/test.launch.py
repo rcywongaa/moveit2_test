@@ -37,15 +37,7 @@ def load_yaml(package_name, file_path):
 
 def generate_launch_description():
 
-    pkg_robot = get_package_share_directory('robot_planner')
-
-    # RViz
-    rviz = Node(
-            package='rviz2',
-            executable='rviz2',
-            # arguments=['-d', os.path.join(pkg_robot, 'rviz', 'test.rviz')],
-            condition=IfCondition(LaunchConfiguration('rviz'))
-            )
+    pkg_robot_planner = get_package_share_directory('robot_planner')
 
     # We fake a balljoint at the end effector to fake position only IK
     robot_description = load_file('robot_planner', 'urdf/robot_w_balljoint.urdf')
@@ -72,8 +64,8 @@ def generate_launch_description():
             ])
 
     pkg_trajectory_file_reader = get_package_share_directory('trajectory_file_reader')
-    file_reader = IncludeLaunchDescription(
-            PythonLaunchDescriptionSource([pkg_trajectory_file_reader, '/main.launch.py']))
+    # file_reader = IncludeLaunchDescription(
+            # PythonLaunchDescriptionSource([pkg_trajectory_file_reader, '/main.launch.py']))
 
     controller = Node(
             package="robot_controller",
@@ -85,13 +77,53 @@ def generate_launch_description():
                'stderr': 'screen'
             },
             parameters=[
-                {"state_topic": "joint_state"},
+                {"state_topic": "/actuated_joint_states"},
                 {"joint_trajectory_topic": "joint_trajectory"}
             ])
+
+    # RViz
+    rviz = Node(
+            package='rviz2',
+            executable='rviz2',
+            name="rviz",
+            arguments=['-d', os.path.join(pkg_robot_planner, 'test.rviz')],
+            # condition=IfCondition(LaunchConfiguration('rviz'))
+            )
+
+    robot_state_publisher = Node(
+            package="robot_state_publisher",
+            executable="robot_state_publisher",
+            name="robot_state_publisher",
+            output="both",
+            parameters=[robot_description_param])
+
+    joint_state_publisher = Node(package='joint_state_publisher',
+             executable='joint_state_publisher',
+             name='joint_state_publisher',
+             arguments=[os.path.join(pkg_robot_planner, 'urdf/robot.urdf')],
+             output='both',
+             parameters=[{'source_list': ["/actuated_joint_states"]}])
+
+    world_link0_tf = Node(package='tf2_ros',
+             executable='static_transform_publisher',
+             name='world_link0_tf_publisher',
+             output='both',
+             arguments=['0.0', '0.0', '0.0', '0.0', '0.0', '0.0', 'world', 'link0'])
+
+    link3_ee_tf = Node(package='tf2_ros',
+             executable='static_transform_publisher',
+             name='link3_ee_tf_publisher',
+             output='both',
+             arguments=['5.0', '0.0', '0.0', '0.0', '0.0', '0.0', 'link3', 'ee'])
 
     return LaunchDescription([
         planner,
         controller,
-        file_reader
+        # file_reader,
+        rviz,
+        joint_state_publisher,
+        robot_state_publisher,
+        world_link0_tf,
+        link3_ee_tf,
     ])
 
