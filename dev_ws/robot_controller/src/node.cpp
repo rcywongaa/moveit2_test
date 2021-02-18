@@ -10,12 +10,14 @@
 
 using namespace std::chrono_literals;
 
-class PrintingConnection : public Connection
+class EchoConnection : public Connection
 {
   public:
-    PrintingConnection()
-      : logger(rclcpp::get_logger("PrintingConnection"))
-    {}
+    EchoConnection()
+      : logger(rclcpp::get_logger("EchoConnection"))
+    {
+      echo_data.resize(12);
+    }
 
     virtual int open() override
     {
@@ -31,30 +33,30 @@ class PrintingConnection : public Connection
 
     virtual int send(std::vector<unsigned char>& data) override
     {
+      std::scoped_lock<std::mutex> lock(mtx);
       RCLCPP_INFO(logger, "\n----- send -----\n%x %x %x %x\n%x %x %x %x\n%x %x %x %x",
+          data[0], data[1], data[2], data[3],
+          data[4], data[5], data[6], data[7],
+          data[8], data[9], data[10], data[11]);
+      echo_data = data;
+      return 0;
+    }
+
+    virtual int receive(std::vector<unsigned char>& data) override
+    {
+      std::scoped_lock<std::mutex> lock(mtx);
+      data = echo_data;
+      RCLCPP_INFO(logger, "\n----- receive -----\n%x %x %x %x\n%x %x %x %x\n%x %x %x %x",
           data[0], data[1], data[2], data[3],
           data[4], data[5], data[6], data[7],
           data[8], data[9], data[10], data[11]);
       return 0;
     }
 
-    virtual int receive(std::vector<unsigned char>& data) override
-    {
-      data = {
-        0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00
-      };
-
-      //RCLCPP_INFO(logger, "receive(\n%x %x %x %x\n%x %x %x %x\n%x %x %x %x",
-          //data[0], data[1], data[2], data[3],
-          //data[4], data[5], data[6], data[7],
-          //data[8], data[9], data[10], data[11]);
-      return 0;
-    }
-
   private:
     rclcpp::Logger logger;
+    std::vector<unsigned char> echo_data;
+    std::mutex mtx;
 };
 
 class RobotControllerNode : public rclcpp::Node
@@ -64,7 +66,7 @@ class RobotControllerNode : public rclcpp::Node
     {
       RCLCPP_INFO(this->get_logger(), "RobotControllerNode created!");
 
-      interface_ = std::make_unique<RobotController>(std::make_unique<PrintingConnection>());
+      interface_ = std::make_unique<RobotController>(std::make_unique<EchoConnection>());
 
       state_publisher_ = this->create_publisher<sensor_msgs::msg::JointState>(
           declare_and_get_parameter("state_topic").as_string(),
